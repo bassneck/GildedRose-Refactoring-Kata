@@ -1,11 +1,11 @@
-require File.join(File.dirname(__FILE__), '..', 'gilded_rose')
+require File.join(File.dirname(__FILE__), '..', 'inventory_item')
 
-describe GildedRose::InventoryItem do
+describe InventoryItem do
+
+  let(:item) { double('Item') }
+  let(:decorated_item) { InventoryItem.new(item) }
 
   describe 'attributes' do
-    let(:item) { double('Item') }
-    let(:decorated_item) { GildedRose::InventoryItem.new(item) }
-
     describe '#name' do
       it 'is delegated to the original item' do
         expect(item).to receive(:name)
@@ -43,14 +43,24 @@ describe GildedRose::InventoryItem do
       end
 
       it "does not change beyond the min-max limit" do
-        decorated_item = GildedRose::InventoryItem.new(item)
-        min_quality = GildedRose::InventoryItem::MIN_QUALITY
-        max_quality = GildedRose::InventoryItem::MAX_QUALITY
+        decorated_item = InventoryItem.new(item)
+        min_quality = InventoryItem::MIN_QUALITY
+        max_quality = InventoryItem::MAX_QUALITY
         random_valid_quality = (min_quality..max_quality).to_a.sample
 
-        expect { decorated_item.quality = (min_quality - 5) }.to change { decorated_item.quality }.to(min_quality)
-        expect { decorated_item.quality = random_valid_quality }.to change { decorated_item.quality }.to(random_valid_quality)
-        expect { decorated_item.quality = (max_quality + 5) }.to change { decorated_item.quality }.to(max_quality)
+        expect { decorated_item.quality = (min_quality - 5) }.to change { item.quality }.to(min_quality)
+        expect { decorated_item.quality = random_valid_quality }.to change { item.quality }.to(random_valid_quality)
+        expect { decorated_item.quality = (max_quality + 5) }.to change { item.quality }.to(max_quality)
+      end
+    end
+
+    describe "#update" do
+      it "delegates to #updater" do
+        updater = double('Updater')
+        decorated_item.updater = updater
+
+        expect(updater).to receive(:update).with(decorated_item)
+        decorated_item.update
       end
     end
   end
